@@ -54,25 +54,25 @@ const getTransferencias = async(data)=>{
         text: 'SELECT * FROM transferencias'
     }
     try {
-        pool.query(query)
+        const {rows} = await pool.query(query)
+        return rows
     } catch (error) {
         console.log(error);
     }
 }
 
 const addTransferencia = async(data)=>{
-    const values = [data[0],data[1],Number(data[2])]
     const agregarTransferencia ={
-        text: "INSERT INTO transferencias (emisor, receptor, monto) values ($1,$2,$3)",
-        values
+        text: "INSERT INTO transferencias(emisor, receptor, monto) values ($1, $2, $3)",
+        values: [data[0], data[1],Number(data[2])]
     };
     const actualizarDatosEmisor = {
-        text: "UPDATE usuarios SET balance = balance - $1 WHERE nombre = $2",
-        values: [Number(data[2]),data[1]]
+        text: "UPDATE usuarios SET balance = balance - $1 WHERE id = $2",
+        values: [Number(data[2]),Number(data[0])]
     }
     const actualizarDatosReceptor = {
-        text: "UPDATE usuarios SET balance = balance + $1 WHERE nombre = $2",
-        values: [Number(data[2]),data[0]]
+        text: "UPDATE usuarios SET balance = balance + $1 WHERE id = $2",
+        values: [Number(data[2]),Number(data[1])]
     }
     try {
         await pool.query('BEGIN')

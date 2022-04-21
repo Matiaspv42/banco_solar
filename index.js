@@ -48,6 +48,7 @@ app.delete('/usuario?:id',async(req,res)=>{
 app.get('/transferencias', async(req,res)=>{
     try {
         const transferencias = await getTransferencias()
+        console.log(transferencias)
         res.json(transferencias)
     } catch (error) {
         console.log(error);
