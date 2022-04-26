@@ -53,7 +53,7 @@
               <input type="text" class="form-control mx-2 w-auto d-inline" id="monto" />
             </div>
 
-            <button type="submit" class="btn btn-danger">Relalizar</button>
+            <button type="submit" class="btn btn-danger">Realizar</button>
           </div>
         </div>
       </form>
@@ -109,6 +109,19 @@
           </tbody>
         </table>
       </div>
+    </div>
+
+    <div class="col-12 col-sm-5 text-center">
+      <h5>Base de datos de Usuarios Eliminados</h5>
+      <table class="table bg-light">
+        <thead class="bg-danger text-white">
+          <th>Nombre</th>
+          <th>Balance</th>
+          <th>Estado</th>
+          <th></th>
+        </thead>
+        <tbody class="estadoUsuarios"></tbody>
+      </table>
     </div>
   </div>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -237,8 +250,11 @@
     const response = await fetch("/usuarios");
     let data = await response.json();
     $(".usuarios").html("");
+    $(".estadoUsuarios").html("");
     $.each(data, (i, c) => {
-      $(".usuarios").append(`
+      // Verificamos que el estado del usuario sea True para renderizarlo.
+      if(c.estado === true){
+        $(".usuarios").append(`
               <tr>
                 <td>${c.nombre}</td>
                 <td>${c.balance}</td>
@@ -254,9 +270,32 @@
                 </td>
               </tr>
          `);
+        //  $(".estadoUsuarios").append(`
+        //       <tr>
+        //         <td>${c.nombre}</td>
+        //         <td>${c.balance}</td>
+        //         <td>${c.estado}</td>
+        //         <td>
+        //         <button class="btn btn-danger" onclick="eliminarUsuario('${c.id}')">Desactivar</button>
+        //         </td>
+        //       </tr>
+        //  `);
 
-      $("#emisor").append(`<option value="${c.id}">${c.nombre}</option>`);
-      $("#receptor").append(`<option value="${c.id}">${c.nombre}</option>`);
+        // Estas lineas fueron movida pues queremos que los usuarios solo puedan realizar transferencias si es que están activos
+        $("#emisor").append(`<option value="${c.id}">${c.nombre}</option>`);
+        $("#receptor").append(`<option value="${c.id}">${c.nombre}</option>`);
+      }else{
+        $(".estadoUsuarios").append(`
+              <tr>
+                <td>${c.nombre}</td>
+                <td>${c.balance}</td>
+                <td>${c.estado}</td>
+                <td>
+                <button class="btn btn-success" onclick="activarUsuario('${c.id}')">Activar</button>
+                </td>
+              </tr>
+         `);
+      }
     });
   };
 
@@ -264,7 +303,9 @@
     const response = await fetch(`/usuario?id=${id}`, {
       method: "DELETE",
     });
-    getUsuarios();
+    // getUsuarios();
+    // comenté el getUsuarios pues estaba generando un problema con las opciones de emisor, receptor para realizar transferencia al momento de activar/desactivar un usuario
+    location.reload()
   };
 
   const getTransferencias = async () => {
@@ -276,13 +317,25 @@
       $(".transferencias").append(`
        <tr>
          <td> ${formatDate(t.fecha)} </td>
-         <td> ${t.emisor} </td>
-         <td> ${t.receptor} </td>
+         <td> ${t.nombre_emisor} </td>
+         <td> ${t.nombre_receptor} </td>
          <td> ${t.monto} </td>
        </tr>
      `);
     });
   };
+
+  const activarUsuario = async(id)=>{
+    try {
+      await axios.put(
+        `/activarUsuario?id=${id}`,
+      );
+      location.reload()
+    } catch (e) {
+      alert("Algo salió mal..." + e);
+    }
+  }
+
 
   getUsuarios();
   getTransferencias();

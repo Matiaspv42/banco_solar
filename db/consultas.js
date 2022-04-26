@@ -38,8 +38,32 @@ const addUsuario = async(data)=>{
 
 const deleteUsuario = async(id)=>{
     const query={
-        text:'DELETE FROM usuarios WHERE id = $1',
+        text:'UPDATE usuarios set estado = false where id = $1',
         values:[id]
+    }
+    try {
+        await pool.query(query)
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+const editUsuario = async(data)=>{
+    const query={
+        text:'UPDATE usuarios set nombre = $1, balance = $2 where id = $3',
+        values:data
+    }
+    try {
+        await pool.query(query)
+    } catch (error) {
+        
+    }
+}
+
+const cambioEstado = async(id)=>{
+    const query = {
+        text: 'UPDATE usuarios set estado = true where id = $1',
+        values: [id]
     }
     try {
         await pool.query(query)
@@ -51,7 +75,7 @@ const deleteUsuario = async(id)=>{
 
 const getTransferencias = async(data)=>{
     const query = {
-        text: 'SELECT * FROM transferencias'
+        text: 'SELECT fecha , monto, (select nombre from usuarios as u where t.emisor = u.id) as nombre_emisor, (select nombre from usuarios as u where t.receptor = u.id) as nombre_receptor FROM transferencias as t'
     }
     try {
         const {rows} = await pool.query(query)
@@ -63,7 +87,7 @@ const getTransferencias = async(data)=>{
 
 const addTransferencia = async(data)=>{
     const agregarTransferencia ={
-        text: "INSERT INTO transferencias(emisor, receptor, monto) values ($1, $2, $3)",
+        text: "INSERT INTO transferencias(emisor, receptor, monto, fecha) values ($1, $2, $3, NOW())",
         values: [data[0], data[1],Number(data[2])]
     };
     const actualizarDatosEmisor = {
@@ -92,5 +116,7 @@ module.exports = {
     addUsuario,
     getTransferencias,
     deleteUsuario,
-    addTransferencia
+    addTransferencia,
+    editUsuario,
+    cambioEstado
 }
