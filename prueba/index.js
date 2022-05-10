@@ -3,9 +3,9 @@ const {getUsuarios, addUsuario, getTransferencias, deleteUsuario, addTransferenc
 const express = require('express');
 const app = express();
 
-const port = process.env.PORT || 3000 
 
-app.listen(port, ()=>{
+
+app.listen(3000, ()=>{
     console.log('Servidor andando en puerto 3000');
 });
 
